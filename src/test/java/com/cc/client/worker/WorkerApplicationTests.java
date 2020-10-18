@@ -1,10 +1,10 @@
-package com.cc;
+package com.cc.client.worker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CcApplicationTests {
+class WorkerApplicationTests {
 
 	@Test
 	void contextLoads() {
