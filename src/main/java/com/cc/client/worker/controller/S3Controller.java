@@ -56,10 +56,8 @@ public class S3Controller {
     //LOGGING
 //    @Value("${aws.s3.bucket.log.name}")
 //    String logginBucket;
-    
 //    @Value("${ aws.s3.bucket.log.folder.name}")
 //    String logginBucketFolder;
-   
     @Autowired
     private QueueMessagingTemplate queueMessagingTemplate;
     @Autowired
@@ -75,6 +73,7 @@ public class S3Controller {
     public List<Bucket> listBuckets(){
         return s3bucketService.getAllBuckets();
     }
+    @CrossOrigin
     @RequestMapping(method=RequestMethod.POST, path = "/upload",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Map<String,String>> uploadFile(@RequestPart(value = "file", required = false) MultipartFile files) throws IOException {
         s3bucketService.uploadFile(files.getOriginalFilename(),files.getBytes());
@@ -131,14 +130,10 @@ public class S3Controller {
 		try {
 			 key = mapper.readValue(file, String.class);
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
-        
         byte[] data = s3bucketService.getFile(key);
         ByteArrayResource resource = new ByteArrayResource(data);
         return ResponseEntity
@@ -148,7 +143,12 @@ public class S3Controller {
                 .header("Content-disposition", "attachment; filename=\"" + key + "\"")
                 .body(resource);
     }
-   
+    @CrossOrigin
+    @GetMapping(path = "/test")
+    public ResponseEntity<String> test() throws IOException {
+	    return ResponseEntity
+	            .ok("Client app is working");
+	}
 //  @GetMapping(path = "/downloadt")
 //  public ResponseEntity<ByteArrayResource> download() throws IOException {
 ////	  InputStream is = getClass().getClassLoader().getResourceAsStream("file.txt");
@@ -164,7 +164,6 @@ public class S3Controller {
 //            .body(resource);
 //}
     
- 
 //    @GetMapping(path = "/download")
 //    public ResponseEntity<ByteArrayResource> download(@RequestParam(value = "file") String file) throws IOException {
 //       byte[] data = s3bucketService.getFile("q.jpg");

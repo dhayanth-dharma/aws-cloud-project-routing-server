@@ -36,13 +36,27 @@ public class S3BucketService {
 	    public List<Bucket> getAllBuckets() {
 	        return amazonS3Client.listBuckets();
 	    }
-
-
 	    public void uploadFile(File uploadFile) {
 	        amazonS3Client.putObject(defaultBucketName, uploadFile.getName(), uploadFile);
 	    }
-
 	    public void uploadFile(String name,byte[] content)  {
+//	        File file = new File("src/main/resources/img/original/"+name);
+	    	File file = new File("/home/ubuntu/app/img/original/"+name);
+	        
+	    	file.canWrite();
+	        file.canRead();
+	        FileOutputStream iofs = null;
+	        try {
+	            iofs = new FileOutputStream(file);
+	            iofs.write(content);
+	            amazonS3Client.putObject(defaultBucketName, originalImgFolder+"/"+file.getName(), file);
+	        } catch (FileNotFoundException e) {
+	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    public void uploadFileWorking(String name,byte[] content)  {
 	        File file = new File("src/main/resources/img/original/"+name);
 	        file.canWrite();
 	        file.canRead();
