@@ -31,6 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.util.json.Jackson;
+import com.cc.client.worker.model.LogginModel;
+import com.cc.client.worker.services.LogginService;
 import com.cc.client.worker.services.S3BucketService;
 import com.cc.client.worker.services.SqsService;
 import com.cc.client.worker.websocket.config.Message_Handler_Singleton;
@@ -62,6 +64,8 @@ public class S3Controller {
     private QueueMessagingTemplate queueMessagingTemplate;
     @Autowired
     private SqsService sqsService;
+    @Autowired
+    private LogginService logginService;
     private Message_Handler_Singleton messagePip;
     
     private static final String reciever_queue_image="sqs_image_reciever_poll";
@@ -75,12 +79,25 @@ public class S3Controller {
     }
     @CrossOrigin
     @RequestMapping(method=RequestMethod.POST, path = "/upload",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Map<String,String>> uploadFile(@RequestPart(value = "file", required = false) MultipartFile files) throws IOException {
-        s3bucketService.uploadFile(files.getOriginalFilename(),files.getBytes());
-        Map<String,String> result = new HashMap<>();
-        result.put("key",files.getOriginalFilename());
-        sendToSQS(files.getOriginalFilename());
-        return  ResponseEntity.ok(result);
+    public ResponseEntity<String> uploadFile(@RequestPart(value = "file", required = false) MultipartFile files) throws IOException {
+    	try {
+    		s3bucketService.uploadFile(files.getOriginalFilename(),files.getBytes());
+            Map<String,String> result = new HashMap<>();
+            result.put("key",files.getOriginalFilename());
+            sendToSQS(files.getOriginalFilename());
+            return  ResponseEntity.ok("Success");
+		} catch (Exception e) {
+			 return  ResponseEntity.ok(e.getMessage());
+		}
+    }
+    
+    @RequestMapping(method=RequestMethod.POST, path = "/uploadT",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<Map<String,String>> uploadFileWorking(@RequestPart(value = "file", required = false) MultipartFile files) throws IOException {
+    		s3bucketService.uploadFile(files.getOriginalFilename(),files.getBytes());
+            Map<String,String> result = new HashMap<>();
+            result.put("key",files.getOriginalFilename());
+            sendToSQS(files.getOriginalFilename());
+            return  ResponseEntity.ok(result);
     }
     public void sendToSQS(String key) {
     	String messageBody=Jackson.toJsonString(key);
@@ -100,8 +117,33 @@ public class S3Controller {
    			  @Header("lookupDestination") String lookupDestination
    	  ) {
    			LOGGER.info("Received reciever image queue message= {}", message);
-//   		byte[] editedImage=s3bucketService.getFile(message);
+   			LogginModel logModel=new LogginModel();
+   			logModel.messageId=messageId;
+   			logModel.message=message;
+   			logModel.logicalResourceId=logicalResourceId;
+   			logModel.approximateReceiveCount=approximateReceiveCount;
+   			logModel.approximateFirstReceiveTimestamp=approximateFirstReceiveTimestamp;
+   			logModel.sentTimestamp=sentTimestamp;
+   			logModel.receiptHandle=receiptHandle;
+   			logModel.senderId=senderId;
+   			logModel.contentType=contentType;
+   			logModel.lookupDestination=lookupDestination;
+   			try {
+				logginService.addLoggin(logModel);
+				String logText=messageId+"\n"+message+"\n"+logicalResourceId+
+						"\n"+approximateReceiveCount+"\n"+approximateFirstReceiveTimestamp
+						+"\n"+sentTimestamp+"\n"+receiptHandle
+						+"\n"+senderId+"\n"+contentType
+						+"\n"+lookupDestination;
+				logginService.addLogginString(logText);
+			} catch (JsonProcessingException e1) {
+				e1.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
    			
+//   		byte[] editedImage=s3bucketService.getFile(message);
    			ObjectMapper mapper = new ObjectMapper();
 			String key="";
 			try {
@@ -136,6 +178,12 @@ public class S3Controller {
 		}
         byte[] data = s3bucketService.getFile(key);
         ByteArrayResource resource = new ByteArrayResource(data);
+        try {
+			logginService.getLogginList();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
         return ResponseEntity
                 .ok()
                 .contentLength(data.length)
@@ -149,6 +197,9 @@ public class S3Controller {
 	    return ResponseEntity
 	            .ok("Client app is working");
 	}
+    
+    
+    
 //  @GetMapping(path = "/downloadt")
 //  public ResponseEntity<ByteArrayResource> download() throws IOException {
 ////	  InputStream is = getClass().getClassLoader().getResourceAsStream("file.txt");
