@@ -29,13 +29,6 @@ public class S3BucketService {
 	    String originalImgFolder;
 	    @Value("${aws.s3.bucket.image_list.edited.folder}")
 	    String editedImgFolder;
-	    //LOGGING
-//	    @Value("${aws.s3.bucket.log.name}")
-//	    String logginBucket;
-//	    
-//	    @Value("${ aws.s3.bucket.log.folder.name}")
-//	    String logginBucketFolder;
-	    
 	    public List<Bucket> getAllBuckets() {
 	        return amazonS3Client.listBuckets();
 	    }
@@ -43,89 +36,19 @@ public class S3BucketService {
 	        amazonS3Client.putObject(defaultBucketName, uploadFile.getName(), uploadFile);
 	    }
 	    public void uploadFile(String name,byte[] content)  {
-//	        File file = new File("src/main/resources/img/original/"+name);
-//	    	File file = new File("./"+name);
-	        
-//	    	file.canWrite();
-//	        file.canRead();
-//	        FileOutputStream iofs = null;
-//	        try {
-//	            iofs = new FileOutputStream(file);
-//	            iofs.write(content);
-//	            amazonS3Client.putObject(defaultBucketName, originalImgFolder+"/"+file.getName(), file);
-	            
-	        	//*******
 	        	InputStream is = new ByteArrayInputStream(content);
 	            ObjectMetadata metadata = new ObjectMetadata();
 	            metadata.setContentLength(content.length);
 	            metadata.setContentType("image/jpg");
 	            metadata.setCacheControl("public, max-age=31536000");
 	            amazonS3Client.putObject(defaultBucketName, originalImgFolder+"/"+name, is,metadata);
-		        //******
-//	        } catch (FileNotFoundException e) {
-//	            e.printStackTrace();
-//	        } catch (IOException e) {
-//	            e.printStackTrace();
-//	        }
 	    }
-	    public void uploadFileWorking(String name,byte[] content)  {
-	        File file = new File("src/main/resources/img/original/"+name);
-	        file.canWrite();
-	        file.canRead();
-	        FileOutputStream iofs = null;
-	        try {
-	            iofs = new FileOutputStream(file);
-	            iofs.write(content);
-	            amazonS3Client.putObject(defaultBucketName, originalImgFolder+"/"+file.getName(), file);
-	        } catch (FileNotFoundException e) {
-	            e.printStackTrace();
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
 	    public byte[] getFile(String key) {
 	        S3Object obj = amazonS3Client.getObject(defaultBucketName, "edited/"+key);
 	        S3ObjectInputStream stream = obj.getObjectContent();
 	        try {
 	            byte[] content = IOUtils.toByteArray(stream);
 	            obj.close();
-	            return content;
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        return null;
-	    }
-	    public byte[] getFileWorking(String key) {
-	        S3Object obj = amazonS3Client.getObject(defaultBucketName, "edited/"+key);
-	        S3ObjectInputStream stream = obj.getObjectContent();
-	        File file = new File("src/main/resources/img/edited/"+key);
-	        file.canWrite();
-	        file.canRead();
-	        FileOutputStream iofs = null;
-	        try {
-	            byte[] content = IOUtils.toByteArray(stream);
-	            obj.close();
-	            iofs = new FileOutputStream(file);
-	            iofs.write(content);
-	            return content;
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        return null;
-	    }
-	    public byte[] test(String key) {
-	        S3Object obj = amazonS3Client.getObject(defaultBucketName, "original/q.jpg");
-	        S3ObjectInputStream stream = obj.getObjectContent();
-	        File file = new File("src/main/resources/img/edited/"+key);
-	        file.canWrite();
-	        file.canRead();
-	        FileOutputStream iofs = null;
-	        try {
-	            byte[] content = IOUtils.toByteArray(stream);
-	            obj.close();
-	            iofs = new FileOutputStream(file);
-	            iofs.write(content);
 	            return content;
 	        } catch (IOException e) {
 	            e.printStackTrace();

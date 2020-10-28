@@ -43,7 +43,6 @@ String bucketNameBinary="custom-loggin-bin";
 	 long time = date.getTime();
 	 Timestamp ts = new Timestamp(time);
 	 amazonS3Client.putObject(bucketNameBinary, "log_"+ts.toString(), new ByteArrayInputStream(bytesToWrite), omd);
-	 
  }
  
  public void getLogginList() throws IOException {
@@ -81,7 +80,6 @@ String bucketNameBinary="custom-loggin-bin";
 	    summaries.forEach(s -> keys.add(s.getKey()));
 	    objects = amazonS3Client.listNextBatchOfObjects(objects);
 	  }
-	 
 	  return keys;
 	}
    

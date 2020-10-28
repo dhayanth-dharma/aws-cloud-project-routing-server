@@ -10,7 +10,4 @@ public class ResponseMessageModel {
 	public int func_id;
 	public String message_type;
 	
-
-	
-	
 }

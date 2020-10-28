@@ -18,17 +18,14 @@ import static com.google.common.base.Predicates.or;
 @Configuration
 @ComponentScan
 public class SwaggerConfig {
-
 	@Bean
 	public Docket postsApi() {
 		return new Docket(DocumentationType.SWAGGER_2).groupName("itcps2-api-doc")
 				.apiInfo(apiInfo()).select().paths(postPaths()).build();
 	}
-
 	private Predicate<String> postPaths() {
 		return or(regex("/api./*"), regex("/api/*"));
 	}
-
 	private ApiInfo apiInfo() {
 		return new ApiInfoBuilder().title("ITCPS2 Project - CLOUD COMPUTING")
 				.description("API reference for developers")

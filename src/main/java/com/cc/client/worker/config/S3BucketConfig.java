@@ -21,30 +21,21 @@ import com.amazonaws.services.sqs.AmazonSQSAsync;
 
 	@Configuration
 	public class S3BucketConfig {
-
 		    @Value("${cloud.aws.region.static}")
 		    private String region;
-
 		    @Value("${aws.accessKey}")
 		    private String awsAccessKey;
-
 		    @Value("${aws.secretKey}")
 		    private String awsSecretKey;
-		    
 		    @Value("${aws.sessionToken}")
 		    private String sessionToken ;
-		    
-		    
-		  
 		    @Primary
 		    @Bean
 		    public AmazonS3Client generateS3Client() {
 		    	AWSSessionCredentials credentials = new BasicSessionCredentials(awsAccessKey, awsSecretKey, sessionToken);
 		        AmazonS3Client client = new AmazonS3Client(credentials);
 		    	return client;
-		    	
 		    }
-		    
 		    @Bean
 		    public AmazonS3 generateS3() {
 		    	BasicAWSCredentials awsCreds = new BasicAWSCredentials(awsAccessKey, awsSecretKey);

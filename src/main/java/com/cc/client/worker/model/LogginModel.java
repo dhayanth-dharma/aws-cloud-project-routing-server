@@ -8,7 +8,6 @@ public class LogginModel {
 	public String approximateFirstReceiveTimestamp;
 	public String sentTimestamp;
 	public String receiptHandle;
-	//QueueMessageVisibility visibility;
 	public String senderId;
 	public String contentType;
 	public String lookupDestination;

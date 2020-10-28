@@ -58,22 +58,20 @@ public class SqsController {
     @Autowired
     private LogginService logginService;
     private Message_Handler_Singleton messagePip;
-	
     public static final Logger LOGGER = LoggerFactory.getLogger(SqsController.class);
     @Value("${aws.endpoint.number_list_sender}")
     private String endpoint; 
     private static final String reciever_queue_num_list="sqs_number_list_reciever_poll";
     private final String sender_queue_num_list="sqs_number_list_sender_poll";	
-    
     @CrossOrigin
 	@RequestMapping(method=RequestMethod.POST, path= "/num_l" )
     public ResponseEntity<String> sendNumberList(@RequestBody final NumberListRequest request) {
     	LOGGER.info("Sending the message to the Amazon sqs.");
         if(!request.input.isEmpty()){
         	String messageBody=Jackson.toJsonString(request);
-        	System.out.println("messageBodyIs:>>> "+messageBody);
-        	queueMessagingTemplate.convertAndSend(sender_queue_num_list, messageBody);
-            LOGGER.info("Message sent successfully to the Amazon sqs.");
+//        	queueMessagingTemplate.convertAndSend(sender_queue_num_list, messageBody);
+        	sqsService.sendMessage(sender_queue_num_list, messageBody);
+        	LOGGER.info("Message sent successfully to the Amazon sqs.");
             return new ResponseEntity("Message sent successfully to the Amazon sqs.", HttpStatus.OK); 
         }else {
         	return new ResponseEntity<>("Number List Empty", HttpStatus.BAD_REQUEST);
@@ -81,7 +79,7 @@ public class SqsController {
     }
     
     @SqsListener(value = reciever_queue_num_list, deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
-	  public void getMessageFromSqs(
+    public void getMessageFromSqs(
 			  String message, 
 			  @Header("MessageId") String messageId,
 			  @Header("LogicalResourceId") String logicalResourceId,
@@ -94,8 +92,6 @@ public class SqsController {
 			  @Header("contentType") String contentType,
 			  @Header("lookupDestination") String lookupDestination
 			  ) {
-    	
-		LOGGER.info("Received message= {}", message);
 		LOGGER.info("Received reciever image queue message= {}", message);
 			LogginModel logModel=new LogginModel();
 			logModel.messageId=messageId;
@@ -119,27 +115,25 @@ public class SqsController {
 		} catch (JsonProcessingException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ObjectMapper mapper = new ObjectMapper();
-		NumberListRequest request=new NumberListRequest();
+		NumberListRequest response=new NumberListRequest();
 		try {
-			request = mapper.readValue(message, NumberListRequest.class);
+			response= mapper.readValue(message, NumberListRequest.class);
 		} catch (JsonMappingException e) {
 			e.printStackTrace();
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		ResponseMessageModel msg=new ResponseMessageModel();
-		msg.message=Jackson.toJsonString(request);
+		msg.message=Jackson.toJsonString(response);
 		msg.page_id=2;
 		msg.func_id=200;
 		msg.message_type="message";
 		messagePip=Message_Handler_Singleton.getInstance();
 		messagePip.sendMsh(msg);
 		LOGGER.info("Successfully Dispatched");
-		
 		try {
 			logginService.getLogginList();
 		} catch (IOException e) {

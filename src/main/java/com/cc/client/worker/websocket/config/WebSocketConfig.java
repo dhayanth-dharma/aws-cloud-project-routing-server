@@ -13,7 +13,5 @@ public class WebSocketConfig implements WebSocketConfigurer {
 		registry.addHandler(new SocketTextHandler(), "/user").setAllowedOrigins("*");
 		registry.addHandler(new SocketTextHandler(), "/potting_initiate_connect").setAllowedOrigins("*");
 	}
-	
-	
 
 }

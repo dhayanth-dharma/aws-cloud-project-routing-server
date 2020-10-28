@@ -18,29 +18,21 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 
 @Configuration
 public class SQSConfig {
-
 	    @Value("${cloud.aws.region.static}")
 	    private String region;
-
 	    @Value("${aws.accessKey}")
 	    private String awsAccessKey;
-
 	    @Value("${aws.secretKey}")
 	    private String awsSecretKey;
-	    
 	    @Value("${aws.sessionToken}")
 	    private String sessionToken ;
-	    
-	    
 	    @Bean
 	    public QueueMessagingTemplate queueMessagingTemplate() {
 	        return new QueueMessagingTemplate(amazonSQSAsync());
 	    }
-
 	    @Primary
 	    @Bean
 	    public AmazonSQSAsync amazonSQSAsync() {
-	    	
 	     AWSSessionCredentials credentials = new BasicSessionCredentials(awsAccessKey, awsSecretKey, sessionToken);
 	      return AmazonSQSAsyncClientBuilder.standard().withRegion(Regions.US_EAST_1)
 	              .withCredentials(new AWSStaticCredentialsProvider(credentials))
