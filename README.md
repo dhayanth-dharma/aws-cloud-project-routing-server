@@ -9,7 +9,7 @@
 
 >**Dhayananth Dharmalingam**
 
-(Video demo : [click-here](https://github.com/ujm-cloud-computing-open))
+(Video demo : [click-here](https://www.youtube.com/watch?v=gS8hE2Xa2jM))
 
 ## Project Overview 
 ![Alt text](https://raw.githubusercontent.com/ujm-cloud-computing-open/front-app/main/proj-architecture.png "Project architecture")
